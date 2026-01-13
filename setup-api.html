@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Setup Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f7ff;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a2980;
+            border-bottom: 3px solid #26d0ce;
+            padding-bottom: 10px;
+        }
+        .step {
+            background: #f8f9ff;
+            border-left: 5px solid #1a2980;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        .step-number {
+            display: inline-block;
+            background: #1a2980;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        code {
+            background: #2d3436;
+            color: #00ff9d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .note {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📡 Google Drive API Setup Guide</h1>
+        
+        <div class="success">
+            ✅ <strong>Your Client ID is already configured:</strong><br>
+            <code>121256470278-hqruts5pc4jqduakbjn5077prfmv5cmr.apps.googleusercontent.com</code>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">1</span> Enable Google Drive API</h3>
+            <p>Go to <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank">Google Cloud Console → APIs & Services → Library</a></p>
+            <p>Search for "Google Drive API" and click <strong>ENABLE</strong></p>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">2</span> Configure OAuth Consent Screen</h3>
+            <p>In Google Cloud Console, go to <strong>APIs & Services → OAuth consent screen</strong></p>
+            <ul>
+                <li>User Type: <strong>External</strong></li>
+                <li>App name: <strong>My Document Portal</strong></li>
+                <li>Add your email in both fields</li>
+                <li>Add scope: <code>../auth/drive.file</code></li>
+                <li>Add your email as test user</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">3</span> Your Credentials</h3>
+            <p><strong>Client ID:</strong> <code>121256470278-hqruts5pc4jqduakbjn5077prfmv5cmr.apps.googleusercontent.com</code></p>
+            <p><strong>Project ID:</strong> <code>auto-doc-manager</code></p>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">4</span> Authorized URLs</h3>
+            <p>Make sure these URLs are in your OAuth Client ID settings:</p>
+            <ul>
+                <li><code>https://YOUR_USERNAME.github.io</code></li>
+                <li><code>http://localhost</code></li>
+                <li><code>http://localhost:5500</code></li>
+                <li><code>http://127.0.0.1:5500</code></li>
+            </ul>
+        </div>
+        
+        <div class="note">
+            ⚠️ <strong>Important:</strong> The first time you use the API, you'll need to authorize the app. 
+            Click "Advanced" → "Go to My Document Portal (unsafe)" → "Allow"
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="index.html" style="display: inline-block; padding: 15px 30px; background: #1a2980; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                ← Back to Login
+            </a>
+        </div>
+    </div>
+</body>
+</html>
