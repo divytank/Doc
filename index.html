@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Document Manager</title>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            text-align: center;
+        }
+        .logo {
+            margin-bottom: 30px;
+        }
+        .logo i {
+            font-size: 72px;
+            color: #1a2980;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #1a2980;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+        .login-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .api-login {
+            background: #f8f9ff;
+            border: 2px solid #1a2980;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .api-login:hover {
+            background: #1a2980;
+            transform: translateY(-3px);
+        }
+        .api-login:hover i,
+        .api-login:hover h3,
+        .api-login:hover p {
+            color: white;
+        }
+        .api-login i {
+            font-size: 40px;
+            color: #1a2980;
+            margin-bottom: 15px;
+        }
+        .api-login h3 {
+            color: #1a2980;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .api-login p {
+            color: #666;
+            font-size: 14px;
+        }
+        .password-login {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+        .password-input {
+            position: relative;
+            margin: 20px 0;
+        }
+        .password-input input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            padding-left: 50px;
+            transition: all 0.3s;
+        }
+        .password-input input:focus {
+            border-color: #1a2980;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 41, 128, 0.1);
+        }
+        .password-input i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+        .login-btn {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(26, 41, 128, 0.3);
+        }
+        .error {
+            background: #ffebee;
+            color: #d32f2f;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .setup-note {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        .setup-note i {
+            color: #ff9800;
+            margin-right: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-database"></i>
+            <h1>API Document Manager</h1>
+            <p class="subtitle">Full automation with Google Drive API</p>
+        </div>
+        
+        <div class="login-options">
+            <!-- API Login -->
+            <div class="api-login" id="apiLoginBtn">
+                <i class="fas fa-robot"></i>
+                <h3>API Auto-Login</h3>
+                <p>Connect to Google Drive API for automatic file management</p>
+                <div id="g_id_onload"
+                     data-client_id="YOUR_CLIENT_ID_HERE"
+                     data-context="signin"
+                     data-ux_mode="popup"
+                     data-login_uri="https://yourusername.github.io"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="rectangular"
+                     data-theme="outline"
+                     data-text="signin_with"
+                     data-size="large"
+                     data-logo_alignment="left">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Password Login Fallback -->
+        <div class="password-login">
+            <h3>Or Use Password</h3>
+            <div class="password-input">
+                <i class="fas fa-key"></i>
+                <input type="password" id="password" placeholder="Enter password">
+            </div>
+            <button class="login-btn" onclick="passwordLogin()">
+                <i class="fas fa-sign-in-alt"></i> Login with Password
+            </button>
+            <div class="error" id="error">Incorrect password!</div>
+        </div>
+        
+        <!-- Setup Instructions -->
+        <div class="setup-note">
+            <p><i class="fas fa-exclamation-triangle"></i> <strong>API Setup Required:</strong> Replace YOUR_CLIENT_ID_HERE with your actual Google Client ID</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const PASSWORD = "C6222180";
+        const CLIENT_ID = "YOUR_CLIENT_ID_HERE"; // ← REPLACE THIS
+        
+        // Handle API login
+        function handleCredentialResponse(response) {
+            console.log("Google API Response:", response);
+            
+            // Store the credential
+            sessionStorage.setItem('google_credential', response.credential);
+            sessionStorage.setItem('authenticated', 'true');
+            sessionStorage.setItem('login_method', 'api');
+            
+            // Load Drive API
+            loadDriveAPI();
+            
+            // Redirect to API dashboard
+            window.location.href = 'dashboard-api.html';
+        }
+        
+        // Load Google Drive API
+        function loadDriveAPI() {
+            const script = document.createElement('script');
+            script.src = 'https://apis.google.com/js/api.js';
+            script.onload = () => {
+                gapi.load('client', initializeDriveAPI);
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Initialize Drive API
+        function initializeDriveAPI() {
+            gapi.client.init({
+                apiKey: '', // Not needed for OAuth
+                clientId: CLIENT_ID,
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+                scope: 'https://www.googleapis.com/auth/drive.file'
+            }).then(() => {
+                console.log('Drive API initialized');
+            }).catch(error => {
+                console.error('Drive API init error:', error);
+            });
+        }
+        
+        // Password login fallback
+        function passwordLogin() {
+            const input = document.getElementById('password').value;
+            if (input === PASSWORD) {
+                sessionStorage.setItem('authenticated', 'true');
+                sessionStorage.setItem('login_method', 'password');
+                window.location.href = 'dashboard-simple.html';
+            } else {
+                document.getElementById('error').style.display = 'flex';
+            }
+        }
+        
+        // Initialize Google Sign-In
+        function initializeGoogleSignIn() {
+            if (CLIENT_ID && CLIENT_ID !== 'YOUR_CLIENT_ID_HERE') {
+                // Configure Google Sign-In
+                google.accounts.id.initialize({
+                    client_id: CLIENT_ID,
+                    callback: handleCredentialResponse,
+                    auto_select: false,
+                    cancel_on_tap_outside: true,
+                    context: 'signin'
+                });
+                
+                // Render button
+                google.accounts.id.renderButton(
+                    document.getElementById('apiLoginBtn'),
+                    {
+                        type: 'standard',
+                        theme: 'filled_blue',
+                        size: 'large',
+                        text: 'continue_with',
+                        shape: 'rectangular',
+                        logo_alignment: 'left',
+                        width: 400
+                    }
+                );
+                
+                // Also show One Tap
+                google.accounts.id.prompt();
+            } else {
+                document.getElementById('apiLoginBtn').innerHTML = `
+                    <i class="fas fa-exclamation-triangle" style="color: #ff9800;"></i>
+                    <h3>API Setup Required</h3>
+                    <p>Please add your Google Client ID to enable API features</p>
+                    <a href="setup-api.html" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #1a2980; color: white; border-radius: 8px; text-decoration: none;">
+                        <i class="fas fa-cog"></i> Setup API Now
+                    </a>
+                `;
+            }
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initializeGoogleSignIn);
+        
+        // Enter key support
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') passwordLogin();
+        });
+    </script>
+</body>
+</html>
