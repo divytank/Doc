@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Dashboard | Document Manager</title>
+    <style>
+        :root {
+            --primary: #1a2980;
+            --secondary: #26d0ce;
+            --danger: #ff6b6b;
+            --success: #00b894;
+            --dark: #2d3436;
+            --light: #f8f9fa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f7ff;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Upload Section */
+        .upload-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 2px dashed #ddd;
+        }
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        .upload-btn {
+            background: var(--primary);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px;
+        }
+        
+        /* Files Grid */
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .file-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+        .file-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .file-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .file-icon i {
+            color: white;
+            font-size: 24px;
+        }
+        .file-info h4 {
+            margin: 0;
+            color: var(--dark);
+            word-break: break-word;
+        }
+        .file-info p {
+            margin: 5px 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .file-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .download-btn {
+            background: var(--success);
+            color: white;
+        }
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+        }
+        
+        /* Instructions */
+        .instructions {
+            background: #e8f4ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .instructions h3 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .step {
+            display: flex;
+            gap: 15px;
+        }
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+        .empty-state i {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .files-grid {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <script>
+        // Check authentication
+        if (!sessionStorage.getItem('authenticated')) {
+            alert('Please login first');
+            window.location.href = 'index.html';
+        }
+    </script>
+    
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-cloud"></i> Simple Document Manager</h1>
+        <button class="btn btn-danger" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h2>Add New Documents</h2>
+            <p>Upload files to Google Drive and add them here</p>
+            <div style="margin-top: 20px;">
+                <a href="https://drive.google.com/drive/u/0/my-drive" target="_blank" class="upload-btn">
+                    <i class="fab fa-google-drive"></i> Upload to Google Drive
+                </a>
+            </div>
+        </div>
+        
+        <!-- Files Section -->
+        <h2 style="margin: 30px 0 20px; color: var(--dark);">
+            <i class="fas fa-folder-open"></i> Your Documents
+        </h2>
+        
+        <div class="files-grid" id="filesGrid">
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>No documents yet</h3>
+                <p>Add your files to the list below</p>
+            </div>
+        </div>
+        
+        <!-- Add File Form -->
+        <div class="upload-section" style="text-align: left;">
+            <h3><i class="fas fa-plus-circle"></i> Add a File to List</h3>
+            <div style="margin: 20px 0;">
+                <input type="text" id="fileName" placeholder="File name (e.g., report.pdf)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+                <input type="text" id="fileLink" placeholder="Google Drive download link" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+                <button onclick="addFile()" style="background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-plus"></i> Add to List
+                </button>
+            </div>
+            <p style="color: #666; font-size: 14px;">
+                <i class="fas fa-info-circle"></i> Get Google Drive download link: Upload to Drive → Share → Copy link → Replace "view" with "uc?export=download&id="
+            </p>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> How to Use</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div>
+                        <h4>Upload to Google Drive</h4>
+                        <p>Upload your files to Google Drive</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div>
+                        <h4>Get Download Link</h4>
+                        <p>Get shareable link and convert to download link</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div>
+                        <h4>Add to This List</h4>
+                        <p>Add file name and link in the form above</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div>
+                        <h4>Access Anywhere</h4>
+                        <p>Login to this portal from any device</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Logout function
+        function logout() {
+            sessionStorage.removeItem('authenticated');
+            window.location.href = 'index.html';
+        }
+        
+        // Load files from localStorage
+        let files = JSON.parse(localStorage.getItem('my_documents')) || [
+            {
+                id: '1',
+                name: 'DOC-20250424-WA0010.pdf',
+                link: 'https://drive.google.com/uc?export=download&id=YOUR_FILE_ID_HERE',
+                date: '2024-04-24'
+            }
+        ];
+        
+        // Display files
+        function displayFiles() {
+            const grid = document.getElementById('filesGrid');
+            
+            if (files.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No documents yet</h3>
+                        <p>Add your first file using the form above</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = '';
+            
+            files.forEach(file => {
+                const card = document.createElement('div');
+                card.className = 'file-card';
+                card.innerHTML = `
+                    <div class="file-header">
+                        <div class="file-icon">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <div class="file-info">
+                            <h4>${file.name}</h4>
+                            <p><i class="fas fa-calendar"></i> ${file.date}</p>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="action-btn download-btn" onclick="downloadFile('${file.link}', '${file.name}')">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteFile('${file.id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        // Add new file
+        function addFile() {
+            const name = document.getElementById('fileName').value.trim();
+            const link = document.getElementById('fileLink').value.trim();
+            
+            if (!name || !link) {
+                alert('Please enter both file name and link');
+                return;
+            }
+            
+            const newFile = {
+                id: Date.now().toString(),
+                name: name,
+                link: link,
+                date: new Date().toLocaleDateString()
+            };
+            
+            files.push(newFile);
+            localStorage.setItem('my_documents', JSON.stringify(files));
+            
+            // Clear inputs
+            document.getElementById('fileName').value = '';
+            document.getElementById('fileLink').value = '';
+            
+            // Refresh display
+            displayFiles();
+            alert('File added successfully!');
+        }
+        
+        // Download file
+        function downloadFile(link, filename) {
+            window.open(link, '_blank');
+            alert(`Downloading: ${filename}`);
+        }
+        
+        // Delete file
+        function deleteFile(fileId) {
+            if (confirm('Delete this file from list?')) {
+                files = files.filter(file => file.id !== fileId);
+                localStorage.setItem('my_documents', JSON.stringify(files));
+                displayFiles();
+            }
+        }
+        
+        // Load files on page load
+        displayFiles();
+    </script>
+</body>
+</html>
