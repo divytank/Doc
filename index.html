@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Docs | Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="login-page">
+    <div class="container">
+        <div class="glass-card login-card">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>SecureDocs Vault</h1>
+            </div>
+            
+            <div class="login-form">
+                <h2><i class="fas fa-lock"></i> Access Your Documents</h2>
+                <p class="subtitle">Enter your password to continue</p>
+                
+                <div class="input-group">
+                    <i class="fas fa-key"></i>
+                    <input type="password" id="password" placeholder="Enter password (C6222180)" autocomplete="off">
+                    <button class="show-password" type="button">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                
+                <div class="password-hint">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Default password: <code>C6222180</code></span>
+                </div>
+                
+                <button id="loginBtn" class="btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Access Vault
+                </button>
+                
+                <div class="error-message" id="errorMsg">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Incorrect password! Try again.</span>
+                </div>
+                
+                <div class="features">
+                    <h3><i class="fas fa-star"></i> Features:</h3>
+                    <ul>
+                        <li><i class="fas fa-plus-circle"></i> Add new documents</li>
+                        <li><i class="fas fa-trash"></i> Delete documents</li>
+                        <li><i class="fas fa-download"></i> Download files</li>
+                        <li><i class="fas fa-folder"></i> Organized storage</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p><i class="fas fa-lock"></i> Your documents are securely protected</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="particles" id="particles"></div>
+    
+    <script>
+        // Auto-logout when returning to login page
+        sessionStorage.removeItem('authenticated');
+        
+        // Password verification
+        const PASSWORD = "C6222180"; // Your specified password
+        
+        document.getElementById('loginBtn').addEventListener('click', login);
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') login();
+        });
+        
+        // Show/hide password
+        document.querySelector('.show-password').addEventListener('mousedown', function() {
+            document.getElementById('password').type = 'text';
+        });
+        
+        document.querySelector('.show-password').addEventListener('mouseup', function() {
+            document.getElementById('password').type = 'password';
+        });
+        
+        function login() {
+            const input = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (input === PASSWORD) {
+                sessionStorage.setItem('authenticated', 'true');
+                window.location.href = 'dashboard.html';
+            } else {
+                errorMsg.style.display = 'flex';
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+                
+                // Shake animation
+                document.querySelector('.login-form').style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    document.querySelector('.login-form').style.animation = '';
+                }, 500);
+            }
+        }
+        
+        // Create particles background
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 10 + 5 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDuration = Math.random() * 20 + 10 + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.opacity = Math.random() * 0.5 + 0.2;
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+    </script>
+</body>
+</html>
