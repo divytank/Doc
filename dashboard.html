@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Docs | Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <script>
+        // Check authentication
+        if (!sessionStorage.getItem('authenticated')) {
+            window.location.href = 'index.html';
+        }
+        
+        // Auto logout after 30 minutes
+        setTimeout(() => {
+            sessionStorage.removeItem('authenticated');
+            window.location.href = 'index.html';
+        }, 30 * 60 * 1000);
+    </script>
+    
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            <h2>SecureDocs</h2>
+        </div>
+        
+        <div class="user-info">
+            <div class="avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <h3>Welcome!</h3>
+            <p>Document Vault</p>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="active">
+                <a href="dashboard.html">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="upload.html">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Add Documents</span>
+                </a>
+            </li>
+            <li>
+                <a href="manage.html">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Delete Documents</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="storage-info">
+            <h4><i class="fas fa-database"></i> Storage</h4>
+            <div class="progress-bar">
+                <div class="progress" id="storageProgress"></div>
+            </div>
+            <p id="storageText">Loading...</p>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="header">
+            <h1><i class="fas fa-tachometer-alt"></i> Document Dashboard</h1>
+            <div class="header-actions">
+                <button class="btn-secondary" onclick="refreshDocuments()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </header>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3 id="totalFiles">0</h3>
+                <p>Total Documents</p>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                    <i class="fas fa-hdd"></i>
+                </div>
+                <h3 id="totalSize">0 MB</h3>
+                <p>Storage Used</p>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <h3 id="pdfFiles">0</h3>
+                <p>PDF Files</p>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                    <i class="fas fa-file-word"></i>
+                </div>
+                <h3 id="docFiles">0</h3>
+                <p>Word Documents</p>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <div class="section-header">
+                <h2><i class="fas fa-folder-open"></i> Recent Documents</h2>
+                <a href="upload.html" class="btn-primary">
+                    <i class="fas fa-plus"></i> Add New
+                </a>
+            </div>
+            
+            <div class="documents-grid" id="documentsGrid">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading documents...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quick-actions">
+            <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+            <div class="action-buttons">
+                <a href="upload.html" class="action-btn">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Upload Files</span>
+                </a>
+                <a href="manage.html" class="action-btn">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Manage Files</span>
+                </a>
+                <button class="action-btn" onclick="refreshDocuments()">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Refresh List</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            sessionStorage.removeItem('authenticated');
+            window.location.href = 'index.html';
+        });
+        
+        // Load documents
+        let allDocuments = [];
+        
+        function loadDocuments() {
+            // For GitHub Pages, documents would be in /documents folder
+            // This is a mockup - in real implementation, you'd need to track files
+            const mockDocuments = [
+                { name: "Project_Report.pdf", size: "2.4 MB", type: "pdf", date: "2024-01-15" },
+                { name: "Meeting_Notes.docx", size: "1.1 MB", type: "doc", date: "2024-01-14" },
+                { name: "Budget_2024.xlsx", size: "3.7 MB", type: "excel", date: "2024-01-13" },
+                { name: "Ideas.txt", size: "45 KB", type: "text", date: "2024-01-12" },
+                { name: "Photos.zip", size: "15.2 MB", type: "archive", date: "2024-01-11" },
+                { name: "Presentation.pptx", size: "8.9 MB", type: "ppt", date: "2024-01-10" }
+            ];
+            
+            allDocuments = mockDocuments;
+            displayDocuments(allDocuments.slice(0, 6));
+            updateStats();
+        }
+        
+        function getFileIcon(type) {
+            const icons = {
+                'pdf': 'fas fa-file-pdf',
+                'doc': 'fas fa-file-word',
+                'excel': 'fas fa-file-excel',
+                'text': 'fas fa-file-alt',
+                'archive': 'fas fa-file-archive',
+                'ppt': 'fas fa-file-powerpoint',
+                'image': 'fas fa-file-image',
+                'default': 'fas fa-file'
+            };
+            return icons[type] || icons.default;
+        }
+        
+        function displayDocuments(docs) {
+            const grid = document.getElementById('documentsGrid');
+            grid.innerHTML = '';
+            
+            if (docs.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No documents found</h3>
+                        <p>Upload your first document to get started</p>
+                        <a href="upload.html" class="btn-primary">
+                            <i class="fas fa-cloud-upload-alt"></i> Upload Now
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            docs.forEach(doc => {
+                const icon = getFileIcon(doc.type);
+                const docElement = document.createElement('div');
+                docElement.className = 'document-card';
+                docElement.innerHTML = `
+                    <div class="doc-icon">
+                        <i class="${icon}"></i>
+                    </div>
+                    <div class="doc-info">
+                        <h4>${doc.name}</h4>
+                        <p><i class="fas fa-hdd"></i> ${doc.size} • <i class="far fa-calendar"></i> ${doc.date}</p>
+                    </div>
+                    <div class="doc-actions">
+                        <button class="action-btn download-btn" onclick="downloadFile('${doc.name}')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(docElement);
+            });
+        }
+        
+        function updateStats() {
+            const totalFiles = allDocuments.length;
+            const totalSize = allDocuments.reduce((sum, doc) => {
+                const size = parseFloat(doc.size);
+                return sum + (isNaN(size) ? 0 : size);
+            }, 0);
+            const pdfFiles = allDocuments.filter(doc => doc.type === 'pdf').length;
+            const docFiles = allDocuments.filter(doc => doc.type === 'doc').length;
+            
+            document.getElementById('totalFiles').textContent = totalFiles;
+            document.getElementById('totalSize').textContent = totalSize.toFixed(1) + ' MB';
+            document.getElementById('pdfFiles').textContent = pdfFiles;
+            document.getElementById('docFiles').textContent = docFiles;
+            
+            // Update storage progress
+            const progress = Math.min((totalSize / 100) * 100, 100); // Assuming 100MB max
+            document.getElementById('storageProgress').style.width = progress + '%';
+            document.getElementById('storageText').textContent = `${totalSize.toFixed(1)} MB of 100 MB used`;
+        }
+        
+        function downloadFile(filename) {
+            alert(`In a real implementation, this would download: ${filename}\n\nFor GitHub Pages, your files should be in the /documents folder.`);
+            // Real implementation: window.open('documents/' + filename, '_blank');
+        }
+        
+        function refreshDocuments() {
+            document.getElementById('documentsGrid').innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Refreshing documents...</p>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                loadDocuments();
+                showNotification('Documents refreshed successfully!', 'success');
+            }, 500);
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDocuments();
+        });
+    </script>
+</body>
+</html>
